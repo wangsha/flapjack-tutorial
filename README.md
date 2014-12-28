@@ -84,7 +84,7 @@ ls -l /opt/flapjack/bin
 Run something like:
 
 ``` shell
-simulate-failed-check fail-and-recover \
+flapjack simulate fail_and_recover \
   --entity foo-app-01.example.com \
   --check Sausage \
   --time 3
@@ -210,7 +210,7 @@ We're going to assign both Ada and Charles to foo-app-01, and just Ada to foo-db
 
 ``` shell
 curl -w 'response: %{http_code} \n' -X POST -H "Content-type: application/json" \
-  -d @examples/entities_foo-app-01_and_foo-db-01.json \
+  -d @examples/entities_my-app-01_and_my-db-01.json \
   http://localhost:3081/entities
 ```
 
@@ -260,13 +260,13 @@ First up, discover the UUID of Charles' general notification rule by visiting th
 You can also retrieve Charles' notification rules via the API:
 
 ```bash
-curl http://localhost:3081/contacts/21/notification_rules
+curl http://localhost:3081/contacts/22
 ```
 
-Now, we're going to update this notification rule using HTTP PUT ... replace RULE_UUID with the actual UUID in the URL that curl is PUTing to.
+Now, we're going to update this notification rule using HTTP PATCH ... replace RULE_UUID with the actual UUID in the URL that curl is PATCHing to.
 
 ```bash
-curl -w 'response: %{http_code} \n' -X PUT -H "Content-type: application/json" -d \
+curl -w 'response: %{http_code} \n' -X PATCH -H "Content-type: application/json-patch+json" -d \
  '{
     "contact_id": "22",
     "tags": [],
@@ -284,13 +284,13 @@ curl -w 'response: %{http_code} \n' -X PUT -H "Content-type: application/json" -
     "warning_blackhole": false,
     "critical_blackhole": false
   }' \
- http://localhost:3081/notification_rules/RULE_UUID
+ 'http://localhost:3081/notification_rules/RULE_UUID'
 ```
 
 Test with:
 
 ```bash
-simulate-failed-check fail \
+flapjack simulate fail \
   --entity foo-app-01.example.com \
   --check Sausage \
   --state CRITICAL \
@@ -306,7 +306,7 @@ You should see:
 - a sms notification being generated
 
 ```bash
-simulate-failed-check fail \
+flapjack simulate fail \
   --entity foo-app-01.example.com \
   --check Sausage \
   --state WARNING \
@@ -329,7 +329,7 @@ Find the ID of Ada's general notification rule in the output of:
 
 
 ```bash
-curl http://localhost:3081/contacts/22/notification_rules
+curl http://localhost:3081/contacts/21/notification_rules
 ```
 
 ```bash
